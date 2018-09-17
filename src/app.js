@@ -8,6 +8,9 @@ document.addEventListener('DOMContentLoaded', () => {
   const brewdogListView = new BrewdogListView(listContainer);
     brewdogListView.bindEvents();
 
+  const dropdown = document.querySelector('#brewdogs')
+  const selectView = new SelectView(dropdown);
+  selectView.bindEvents();
 
   const brewdog = new Brewdog;
   brewdog.getAllBrewdogData();

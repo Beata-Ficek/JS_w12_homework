@@ -6,7 +6,7 @@ const BrewdogListView = function (htmlContainer) {
 };
 
 BrewdogListView.prototype.bindEvents = function(){
-  PubSub.subscribe('brewdog-all-data-ready', (event) => {
+  PubSub.subscribe('Brewdog-all-data-ready', (event) => {
     this.displayBrewdogInfo(event.detail);
   })
 }
