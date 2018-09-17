@@ -1,5 +1,6 @@
 const Brewdog = require ('./models/brewdog');
 const BrewdogListView = require('./views/brewdog_list_view')
+const SelectView = require ('./views/select_view')
 
 document.addEventListener('DOMContentLoaded', () => {
   console.log('JavaScript Loaded');
@@ -12,6 +13,6 @@ document.addEventListener('DOMContentLoaded', () => {
   const selectView = new SelectView(dropdown);
   selectView.bindEvents();
 
-  const brewdog = new Brewdog;
+  const brewdog = new Brewdog();
   brewdog.getAllBrewdogData();
 })

@@ -78,7 +78,7 @@
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
-eval("const Brewdog = __webpack_require__ (/*! ./models/brewdog */ \"./src/models/brewdog.js\");\nconst BrewdogListView = __webpack_require__(/*! ./views/brewdog_list_view */ \"./src/views/brewdog_list_view.js\")\n\ndocument.addEventListener('DOMContentLoaded', () => {\n  console.log('JavaScript Loaded');\n\n  const listContainer = document.querySelector('#brewdog-list');\n  const brewdogListView = new BrewdogListView(listContainer);\n    brewdogListView.bindEvents();\n\n\n  const brewdog = new Brewdog;\n  brewdog.getAllBrewdogData();\n})\n\n\n//# sourceURL=webpack:///./src/app.js?");
+eval("const Brewdog = __webpack_require__ (/*! ./models/brewdog */ \"./src/models/brewdog.js\");\nconst BrewdogListView = __webpack_require__(/*! ./views/brewdog_list_view */ \"./src/views/brewdog_list_view.js\")\nconst SelectView = __webpack_require__ (/*! ./views/select_view */ \"./src/views/select_view.js\")\n\ndocument.addEventListener('DOMContentLoaded', () => {\n  console.log('JavaScript Loaded');\n\n  const listContainer = document.querySelector('#brewdog-list');\n  const brewdogListView = new BrewdogListView(listContainer);\n    brewdogListView.bindEvents();\n\n  const dropdown = document.querySelector('#brewdogs')\n  const selectView = new SelectView(dropdown);\n  selectView.bindEvents();\n\n  const brewdog = new Brewdog();\n  brewdog.getAllBrewdogData();\n})\n\n\n//# sourceURL=webpack:///./src/app.js?");
 
 /***/ }),
 
@@ -111,7 +111,7 @@ eval("const RequestHelper = function (url) {\n  this.url = url\n}\n\nRequestHelp
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
-eval("const Request = __webpack_require__(/*! ../helpers/request */ \"./src/helpers/request.js\")\nconst PubSub = __webpack_require__(/*! ../helpers/pub_sub */ \"./src/helpers/pub_sub.js\")\n\nconst Brewdog = function(){\n  this.brewdog = [];\n}\n\nBrewdog.prototype.getAllBrewdogData = function(){\n  const request = new Request ('https://s3-eu-west-1.amazonaws.com/brewdogapi/beers.json')\n  request.get((data) => {\n  PubSub.publish('brewdog-all-data-ready', data);\n  // console.log(data)\n  })\n}\n\n\n\n\nmodule.exports = Brewdog;\n\n\n//# sourceURL=webpack:///./src/models/brewdog.js?");
+eval("const Request = __webpack_require__(/*! ../helpers/request */ \"./src/helpers/request.js\")\nconst PubSub = __webpack_require__(/*! ../helpers/pub_sub */ \"./src/helpers/pub_sub.js\")\n\nconst Brewdog = function(){\n  this.brewdog = [];\n}\n\nBrewdog.prototype.bindEvents = function(){\n  PubSub.subscribe('SelectView-change', (event) => {\n        const indexIwant = event.detail;\n        const brewdogIwant = this.brewdog[indexIwant];\n        PubSub.publish('Brewdog-ready', brewdogIwant);\n  })\n}\n\nBrewdog.prototype.getAllBrewdogData = function(){\n  const request = new Request ('https://s3-eu-west-1.amazonaws.com/brewdogapi/beers.json')\n  request.get((data) => {\n    this.brewdog = data;\n    PubSub.publish('Brewdog-all-data-ready', data);\n    this.getBrewdogNames(data);\n  })\n}\n\nBrewdog.prototype.getBrewdogNames = function(){\n  const onlyNames = [];\n  this.brewdog.forEach(beer => {\n    onlyNames.push(beer.name)\n      // console.log(onlyNames);\n  });\n  PubSub.publish('Brewdog-names-ready', onlyNames);\n}\n\nmodule.exports = Brewdog;\n\n\n//# sourceURL=webpack:///./src/models/brewdog.js?");
 
 /***/ }),
 
@@ -133,7 +133,18 @@ eval("\nconst BrewdogInfoView = function () {\n\n}\n\nBrewdogInfoView.prototype.
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
-eval("const PubSub = __webpack_require__(/*! ../helpers/pub_sub.js */ \"./src/helpers/pub_sub.js\");\nconst BrewdogInfoView = __webpack_require__(/*! ./brewdog_info_view */ \"./src/views/brewdog_info_view.js\");\n\nconst BrewdogListView = function (htmlContainer) {\n  this.htmlContainer = htmlContainer;\n};\n\nBrewdogListView.prototype.bindEvents = function(){\n  PubSub.subscribe('brewdog-all-data-ready', (event) => {\n    this.displayBrewdogInfo(event.detail);\n  })\n}\n\nBrewdogListView.prototype.displayBrewdogInfo = function(beers){\n  beers.forEach((beer) => {\n    const brewdogItem = this.createBrewdogListItem(beer);\n    this.htmlContainer.appendChild(brewdogItem);\n    console.log(brewdogItem);\n  })\n}\n\nBrewdogListView.prototype.createBrewdogListItem = function(beer){\n  const brewdogInfoView = new BrewdogInfoView();\n  const brewdogInfo = brewdogInfoView.createBrewdogInfo(beer);\n  return brewdogInfo;\n}\n\n\nmodule.exports = BrewdogListView;\n\n\n//# sourceURL=webpack:///./src/views/brewdog_list_view.js?");
+eval("const PubSub = __webpack_require__(/*! ../helpers/pub_sub.js */ \"./src/helpers/pub_sub.js\");\nconst BrewdogInfoView = __webpack_require__(/*! ./brewdog_info_view */ \"./src/views/brewdog_info_view.js\");\n\nconst BrewdogListView = function (htmlContainer) {\n  this.htmlContainer = htmlContainer;\n};\n\nBrewdogListView.prototype.bindEvents = function(){\n  PubSub.subscribe('Brewdog-all-data-ready', (event) => {\n    this.displayBrewdogInfo(event.detail);\n  })\n}\n\nBrewdogListView.prototype.displayBrewdogInfo = function(beers){\n  beers.forEach((beer) => {\n    const brewdogItem = this.createBrewdogListItem(beer);\n    this.htmlContainer.appendChild(brewdogItem);\n    console.log(brewdogItem);\n  })\n}\n\nBrewdogListView.prototype.createBrewdogListItem = function(beer){\n  const brewdogInfoView = new BrewdogInfoView();\n  const brewdogInfo = brewdogInfoView.createBrewdogInfo(beer);\n  return brewdogInfo;\n}\n\n\nmodule.exports = BrewdogListView;\n\n\n//# sourceURL=webpack:///./src/views/brewdog_list_view.js?");
+
+/***/ }),
+
+/***/ "./src/views/select_view.js":
+/*!**********************************!*\
+  !*** ./src/views/select_view.js ***!
+  \**********************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+eval("const PubSub = __webpack_require__(/*! ../helpers/pub_sub */ \"./src/helpers/pub_sub.js\");\n\nconst SelectView = function (htmlElement) {\n    this.htmlElement = htmlElement;\n}\n\nSelectView.prototype.bindEvents = function () {\n    PubSub.subscribe('Brewdog-names-ready', (event) => {\n        this.populate(event.detail);\n    });\n\n    this.htmlElement.addEventListener('change', (event) => {\n        const selectedIndex = event.target.value;\n        PubSub.publish('SelectView-change', selectedIndex);\n    })\n}\n\n\n\nSelectView.prototype.populate = function (beerNames) {\n    beerNames.forEach((name, index) => {\n        const option = document.createElement('option');\n        option.textContent = name;\n        option.value = index;\n\n        this.htmlElement.appendChild(option);\n    });\n}\n\nmodule.exports = SelectView;\n\n\n//# sourceURL=webpack:///./src/views/select_view.js?");
 
 /***/ })
 
